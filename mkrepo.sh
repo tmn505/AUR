@@ -137,11 +137,11 @@ for d in ${allpkgdirs[@]}; do
 		pkgversion="$(get_version)"
 
 		if [ ! -f "${pkgdest}/${pkgnames[0]}-${pkgversion}"*.pkg.tar.* ]; then
+			printf "==> Building ${pkgnames[*]} ${pkgversion}\n"
 			if [[ "${pkgarch[@]}" =~ "${alarch}" ]] || [[ "${pkgarch[@]}" =~ "any" ]]; then
 				# apply quirks
-				patch_${d##*/}_pkgbuild || true
+				declare -f patch_${d##*/}_pkgbuild &> /dev/null && patch_${d##*/}_pkgbuild
 
-				printf "==> Building ${pkgnames[*]} ${pkgversion}\n"
 				chroot --userspec=${builduser}:${builduser} ${alchroot} /bin/bash -c \
 					"source /etc/profile; \
 					cd /home/${builduser}/${reponame}/${d} && \
