@@ -131,7 +131,7 @@ for d in ${allpkgdirs[@]}; do
 			chroot --userspec=${builduser}:${builduser} ${alchroot} /bin/bash -c \
 				"source /etc/profile; \
 				cd /home/${builduser}/${reponame}/${d} && \
-				makepkg -o -r -s -C --skippgpcheck --needed --noconfirm"
+				makepkg -o -r -s -A -C --skippgpcheck --needed --noconfirm"
 		fi
 
 		pkgversion="$(get_version)"
