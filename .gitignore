@@ -1,4 +1,6 @@
 # package src/pkg archives, downloaded sources
+*.deb
+*.rpm
 *.tar*
 *.tgz
 *.zip
