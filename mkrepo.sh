@@ -155,7 +155,7 @@ for d in ${allpkgdirs[@]}; do
 
 			else
 				printf "==> Package not available for ${alarch}, skipping\n"
-				return 0
+				true
 			fi
 		fi
 	fi)
