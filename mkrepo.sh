@@ -101,7 +101,7 @@ for fp in ${allpkgfiles[@]}; do
 done
 
 # make sure builduser owns its stuff
-chown -R ${builduser}:${builduser} ${alchroot}/home/${builduser}/{repo,src,${reponame}}
+chown -R ${builduseruid}:${buildusergid} ${alchroot}/home/${builduser}/{repo,src,${reponame}}
 
 printf "==> Build packages for ${alarch}\n"
 printenv
@@ -128,7 +128,7 @@ for d in ${allpkgdirs[@]}; do
 		pkgpos1="${pkgnames[0]}"
 
 		if [[ "${vcssuffix[@]}" =~ "${pkgpos1##*-}" ]]; then
-			chroot --userspec=${builduser}:${builduser} ${alchroot} /bin/bash -c \
+			chroot --userspec=${builduseruid}:${buildusergid} ${alchroot} /bin/bash -c \
 				"source /etc/profile; \
 				cd /home/${builduser}/${reponame}/${d} && \
 				makepkg -o -r -s -A -C --skippgpcheck --needed --noconfirm"
@@ -142,7 +142,7 @@ for d in ${allpkgdirs[@]}; do
 				# apply quirks
 				declare -f patch_${d##*/}_pkgbuild &> /dev/null && patch_${d##*/}_pkgbuild
 
-				chroot --userspec=${builduser}:${builduser} ${alchroot} /bin/bash -c \
+				chroot --userspec=${builduseruid}:${buildusergid} ${alchroot} /bin/bash -c \
 					"source /etc/profile; \
 					cd /home/${builduser}/${reponame}/${d} && \
 					makepkg -c -f -m -r -s --holdver --skippgpcheck --needed --noconfirm"
