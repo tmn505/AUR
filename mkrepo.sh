@@ -97,6 +97,7 @@ for fp in ${allpkgfiles[@]}; do
 	(fn=${fp##*/}
 	if [[ ! "${allpkgnames[@]}" =~ "${fn%-*-*-*.pkg.tar.*}" ]]; then
 		chroot ${alchroot} /bin/bash -c "repo-remove ${pkgdest}/${reponame}.db.tar.gz ${fn%-*-*-*.pkg.tar.*}"
+		rm -f ${fp}
 	fi)
 done
 
