@@ -1,37 +1,50 @@
-# This is a basic workflow to help you get started with Actions
-name: CI
+name: AUR
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
 on:
-  create: { }
   push:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
-    runs-on: ubuntu-18.04
+  main:
+    name: Build & Release
+    runs-on: ubuntu-latest
+    env:
+      LANG: en_US.UTF-8
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Check out repo
+      - name: Check out repository
         uses: actions/checkout@v2
 
-      # Runs a set of commands using the runners shell
-      - name: Prepare and run build
+      - name: Prepare
+        run: |
+          sudo locale-gen en_US.UTF-8
+          sudo update-locale LANG=en_US.UTF-8
+          sudo apt-get update
+          sudo apt-get -y install libarchive-tools zstd
+          git clone --depth 1 --branch gh-pages $GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git $HOME/repo || true
+
+      - name: Build artifacts
         env:
           ALARCH: x86_64
         run: |
-          sudo apt-get update
-          sudo apt-get -y install libarchive-tools zstd
-          id
-          pwd
-          ls -l
-          printenv | sort
           sudo $GITHUB_WORKSPACE/mkrepo.sh $USER $GITHUB_WORKSPACE $ALARCH
+          REPONAME=$(basename $GITHUB_REPOSITORY)
+          sudo chown -R $USER $HOME/repo
+          ./createlinks.sh $HOME/repo $REPONAME
+          ./genindex.sh $HOME/repo $REPONAME
+
+      - name: Publish built artifacts
+        if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd $HOME/repo
+          git update-ref -d HEAD
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Publish $GITHUB_REPOSITORY/$GITHUB_RUN_ID/$GITHUB_RUN_NUMBER"
+          git push -f "https://$GITHUB_REPOSITORY_OWNER:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git" gh-pages
