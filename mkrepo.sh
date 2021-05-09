@@ -69,7 +69,6 @@ mount --bind ${srcdest} ${alchroot}${srcdest}
 mount --bind ${reposrc} ${alchroot}/home/${builduser}/${reponame}
 
 printf "MAKEFLAGS='-j2'\nPACKAGER=\"${reponame} build bot\"\nPKGDEST=${pkgdest}\nSRCDEST=${srcdest}\n" >> ${alchroot}/etc/makepkg.conf
-sed -e 's,\.xz,\.zst,' -i ${alchroot}/etc/makepkg.conf
 
 # add local repo where new packagess will be added
 if [ ! -f ${alchroot}${pkgdest}/${reponame}.db.tar.gz ]; then
@@ -82,7 +81,6 @@ cp -f ${alchroot}${pkgdest}/${reponame}.db.tar.gz ${alchroot}/var/lib/pacman/syn
 allpkgdirs=( $(grep -v -e '^#' -e '=' -e '^$' ${reposrc}/repo-make.conf) )
 
 # download dependencies from AUR specified in repo-make.conf
-# Traditional warning: inspect what You download from AUR!
 for d in ${allpkgdirs[@]}; do
 	if [ ! -d ${reposrc}/${d} ]; then
 		git clone --depth=1 https://aur.archlinux.org/${d##*/}.git ${reposrc}/${d}
@@ -90,7 +88,7 @@ for d in ${allpkgdirs[@]}; do
 done
 
 # remove packages from repo, not in or commented out in repo-make.conf
-allpkgnames=( $(for d in ${allpkgdirs[@]}; do cd ${reposrc}/${d} && source ./PKGBUILD && printf '%s\n' "${pkgname[@]}"; done) )
+allpkgnames=( $(for d in ${allpkgdirs[@]}; do awk '/^pkgname/ {print $3}' ${reposrc}/${d}/.SRCINFO; done) )
 allpkgfiles=( $(find ${pkgdest}/ -xtype f -name "*.pkg.tar.*" ! -name "*.sig") )
 
 for fp in ${allpkgfiles[@]}; do
@@ -108,12 +106,15 @@ printf "==> Build packages for ${alarch}\n"
 printenv
 
 get_version() {
-	source ./PKGBUILD
+	local pkgversion pkgepoch
 
-	if [ -z "${epoch}" ]; then
-		printf "${pkgver}-${pkgrel}"
+	pkgversion=$(awk '((/^\tpkgver/ && ORS="-") || (/^\tpkgrel/ && ORS=RS)) {print $3}' .SRCINFO)
+	pkgepoch=$(awk '/^\tepoch/ {printf $3}' .SRCINFO)
+
+	if [ -z "${pkgepoch}" ]; then
+		printf "${pkgversion}"
 	else
-		printf "${epoch}:${pkgver}-${pkgrel}"
+		printf "${pkgepoch}:${pkgversion}"
 	fi
 }
 
@@ -122,8 +123,8 @@ for d in ${allpkgdirs[@]}; do
 	(if [ -d "${reposrc}/${d}" ]; then
 		cd ${reposrc}/${d}
 
-		pkgnames=( $(source ./PKGBUILD; printf '%s\n' "${pkgname[@]}") )
-		pkgarch=( $(source ./PKGBUILD; printf '%s\n' "${arch[@]}") )
+		pkgnames=( $(awk '/^pkgname/ {print $3}' .SRCINFO) )
+		pkgarch=( $(awk '/^\tarch/ {print $3}' .SRCINFO) )
 
 		# pull latest version for VCS packages
 		pkgpos1="${pkgnames[0]}"
@@ -132,7 +133,8 @@ for d in ${allpkgdirs[@]}; do
 			chroot --userspec=${builduseruid}:${buildusergid} ${alchroot} /bin/bash -c \
 				"source /etc/profile; \
 				cd /home/${builduser}/${reponame}/${d} && \
-				makepkg -o -r -s -A -C --skippgpcheck --needed --noconfirm"
+				makepkg -o -r -s -A -C --skippgpcheck --needed --noconfirm && \
+				makepkg --printsrcinfo > .SRCINFO"
 		fi
 
 		pkgversion="$(get_version)"
