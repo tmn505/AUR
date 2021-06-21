@@ -30,7 +30,7 @@ setup_x86_64_chroot() {
 	imageinfo="$(wget -q https://www.archlinux.org/iso/latest/sha1sums.txt -O - | grep bootstrap)"
 	imagename="${imageinfo##* }"
 
-	wget -nc -P ${cachedir}/ "${mirror}/archlinux/iso/latest/${imagename}"
+	wget -nc -P ${cachedir}/ "${mirror}/iso/latest/${imagename}"
 	tar -x --strip 1 -C ${alchroot}/ -f ${cachedir}/${imagename}
 	printf "Server = ${mirror}/archlinux/\$repo/os/\$arch\n" >> ${alchroot}/etc/pacman.d/mirrorlist
 }
