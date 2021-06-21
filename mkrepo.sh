@@ -32,7 +32,7 @@ setup_x86_64_chroot() {
 
 	wget -nc -P ${cachedir}/ "${mirror}/iso/latest/${imagename}"
 	tar -x --strip 1 -C ${alchroot}/ -f ${cachedir}/${imagename}
-	printf "Server = ${mirror}/archlinux/\$repo/os/\$arch\n" >> ${alchroot}/etc/pacman.d/mirrorlist
+	printf "Server = ${mirror}/\$repo/os/\$arch\n" >> ${alchroot}/etc/pacman.d/mirrorlist
 }
 
 # set up-to-date chroot
