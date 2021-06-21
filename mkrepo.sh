@@ -25,7 +25,7 @@ setup_x86_64_chroot() {
 
 	local imageinfo imagename mirror
 
-	mirror="https://mirrors.ocf.berkeley.edu"
+	mirror="https://america.mirror.pkgbuild.com"
 
 	imageinfo="$(wget -q https://www.archlinux.org/iso/latest/sha1sums.txt -O - | grep bootstrap)"
 	imagename="${imageinfo##* }"
