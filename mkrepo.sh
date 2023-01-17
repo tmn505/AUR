@@ -27,7 +27,7 @@ setup_x86_64_chroot() {
 
 	mirror="https://america.mirror.pkgbuild.com"
 
-	imageinfo="$(wget -q https://www.archlinux.org/iso/latest/sha1sums.txt -O - | grep bootstrap)"
+	imageinfo="$(wget -q https://www.archlinux.org/iso/latest/sha256sums.txt -O - | grep bootstrap-x86_64)"
 	imagename="${imageinfo##* }"
 
 	wget -nc -P ${cachedir}/ "${mirror}/iso/latest/${imagename}"
