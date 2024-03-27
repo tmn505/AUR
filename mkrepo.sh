@@ -156,7 +156,9 @@ for d in ${allpkgdirs[@]}; do
 				for n in ${pkgnames[@]}; do
 					chroot ${alchroot} /bin/bash -c "repo-add -n -R ${pkgdest}/${reponame}.db.tar.gz ${pkgdest}/${n}-${pkgversion}*pkg.tar.*"
 				done
-				chroot ${alchroot} /bin/bash -c "repo-add -n -R ${pkgdest}/${reponame}-debug.db.tar.gz ${pkgdest}/${pkgbase}-debug-${pkgversion}*pkg.tar.*"
+				if [[ ! "${pkgarch[@]}" =~ "any" ]]; then
+					chroot ${alchroot} /bin/bash -c "repo-add -n -R ${pkgdest}/${reponame}-debug.db.tar.gz ${pkgdest}/${pkgbase}-debug-${pkgversion}*pkg.tar.*"
+				fi
 				cp -f ${alchroot}${pkgdest}/${reponame}.db.tar.gz ${alchroot}/var/lib/pacman/sync/${reponame}.db
 
 			else
