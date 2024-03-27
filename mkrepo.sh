@@ -124,6 +124,7 @@ for d in ${allpkgdirs[@]}; do
 	(if [ -d "${reposrc}/${d}" ]; then
 		cd ${reposrc}/${d}
 
+		pkgbase=( $(awk '/^pkgbase/ {print $3}' .SRCINFO) )
 		pkgnames=( $(awk '/^pkgname/ {print $3}' .SRCINFO) )
 		pkgarch=( $(awk '/^\tarch/ {print $3}' .SRCINFO) )
 
@@ -154,8 +155,8 @@ for d in ${allpkgdirs[@]}; do
 				# add to repo
 				for n in ${pkgnames[@]}; do
 					chroot ${alchroot} /bin/bash -c "repo-add -n -R ${pkgdest}/${reponame}.db.tar.gz ${pkgdest}/${n}-${pkgversion}*pkg.tar.*"
-					chroot ${alchroot} /bin/bash -c "repo-add -n -R ${pkgdest}/${reponame}-debug.db.tar.gz ${pkgdest}/${n}-debug-${pkgversion}*pkg.tar.*"
 				done
+				chroot ${alchroot} /bin/bash -c "repo-add -n -R ${pkgdest}/${reponame}-debug.db.tar.gz ${pkgdest}/${pkgbase}-debug-${pkgversion}*pkg.tar.*"
 				cp -f ${alchroot}${pkgdest}/${reponame}.db.tar.gz ${alchroot}/var/lib/pacman/sync/${reponame}.db
 
 			else
