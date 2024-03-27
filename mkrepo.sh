@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -e
 
@@ -89,13 +89,14 @@ done
 
 # remove packages from repo, not in or commented out in repo-make.conf
 allpkgnames=( $(for d in ${allpkgdirs[@]}; do awk '/^pkgname/ {print $3}' ${reposrc}/${d}/.SRCINFO; done) )
-allpkgfiles=( $(find ${pkgdest}/ -xtype f -name "*.pkg.tar.*" ! -name "*.sig") )
+allpkgfiles=( $(find ${pkgdest}/ -xtype f -name "*.pkg.tar.*" ! -name "*.sig" ! -name "*-debug-*.pkg.tar.*") )
 
 for fp in ${allpkgfiles[@]}; do
 	(fn=${fp##*/}
 	if [[ ! "${allpkgnames[@]}" =~ "${fn%-*-*-*.pkg.tar.*}" ]]; then
 		chroot ${alchroot} /bin/bash -c "repo-remove ${pkgdest}/${reponame}.db.tar.gz ${fn%-*-*-*.pkg.tar.*}"
-		rm -f ${fp}
+		chroot ${alchroot} /bin/bash -c "repo-remove ${pkgdest}/${reponame}-debug.db.tar.gz ${fn%-*-*-*.pkg.tar.*}-debug"
+		rm -f ${pkgdest}/${fn%-*-*-*.pkg.tar.*}*
 	fi)
 done
 
@@ -153,6 +154,7 @@ for d in ${allpkgdirs[@]}; do
 				# add to repo
 				for n in ${pkgnames[@]}; do
 					chroot ${alchroot} /bin/bash -c "repo-add -n -R ${pkgdest}/${reponame}.db.tar.gz ${pkgdest}/${n}-${pkgversion}*pkg.tar.*"
+					chroot ${alchroot} /bin/bash -c "repo-add -n -R ${pkgdest}/${reponame}-debug.db.tar.gz ${pkgdest}/${n}-debug-${pkgversion}*pkg.tar.*"
 				done
 				cp -f ${alchroot}${pkgdest}/${reponame}.db.tar.gz ${alchroot}/var/lib/pacman/sync/${reponame}.db
 
