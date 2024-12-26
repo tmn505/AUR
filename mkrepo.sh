@@ -68,6 +68,7 @@ mount --bind ${pkgdest} ${alchroot}${pkgdest}
 mount --bind ${srcdest} ${alchroot}${srcdest}
 mount --bind ${reposrc} ${alchroot}/home/${builduser}/${reponame}
 
+sed -e '/DownloadUser/d' -e 's,#DisableSandbox,DisableSandbox,' -i ${alchroot}/etc/pacman.conf
 printf "MAKEFLAGS='-j2'\nPACKAGER=\"${reponame} build bot\"\nPKGDEST=${pkgdest}\nSRCDEST=${srcdest}\n" >> ${alchroot}/etc/makepkg.conf
 
 # add local repo where new packagess will be added
