@@ -25,7 +25,7 @@ setup_x86_64_chroot() {
 
 	local imageinfo imagename mirror
 
-	mirror="https://america.mirror.pkgbuild.com"
+	mirror="https://geo.mirror.pkgbuild.com"
 
 	imageinfo="$(wget -q https://www.archlinux.org/iso/latest/sha256sums.txt -O - | grep bootstrap-x86_64)"
 	imagename="${imageinfo##* }"
