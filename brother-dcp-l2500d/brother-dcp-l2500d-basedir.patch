@@ -1,0 +1,11 @@
+--- a/opt/brother/Printers/DCPL2500D/cupswrapper/brother_lpdwrapper_DCPL2500D
++++ b/opt/brother/Printers/DCPL2500D/cupswrapper/brother_lpdwrapper_DCPL2500D
+@@ -44,7 +44,7 @@ $width=-1;
+ $height=-1;
+ 
+ #my $basedir = Cwd::realpath ($0);
+-my $basedir = `readlink $0`;
++#my $basedir = `readlink $0`;
+ if ( $basedir eq '' ){
+     $basedir = `realpath $0`;
+ }
