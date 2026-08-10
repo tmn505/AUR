@@ -155,7 +155,9 @@ for d in ${allpkgdirs[@]}; do
 
 				# add to repo
 				for n in ${pkgnames[@]}; do
-					chroot ${alchroot} /bin/bash -c "repo-add -n -R ${pkgdest}/${reponame}.db.tar.gz ${pkgdest}/${n}-${pkgversion}*pkg.tar.*"
+					if [ -f "${pkgdest}/${n}-${pkgversion}"*pkg.tar.* ]; then
+						chroot ${alchroot} /bin/bash -c "repo-add -n -R ${pkgdest}/${reponame}.db.tar.gz ${pkgdest}/${n}-${pkgversion}*pkg.tar.*"
+					fi
 				done
 				if [[ ! "${pkgarch[@]}" =~ "any" ]]; then
 					chroot ${alchroot} /bin/bash -c "repo-add -n -R ${pkgdest}/${reponame}-debug.db.tar.gz ${pkgdest}/${pkgbase}-debug-${pkgversion}*pkg.tar.*"
